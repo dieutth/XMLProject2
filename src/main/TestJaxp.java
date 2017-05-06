@@ -29,10 +29,7 @@ public class TestJaxp {
 			System.out.println(e);
 		}
 	}
-	public static void main(String[] args) throws FileNotFoundException {
-		// TODO Auto-generated method stub
-//		String fileLocation = "E:\\OWL-S WEB SERVICES\\Services\\education-novel_author_service.owls\\book_author_service.owls";
-		String fileLocation = "E:\\OWL-S WEB SERVICES\\Services\\travel-citycountry_hotel_service.owls\\citycountry_accommodation_service.owls";
+	public static void translate(String fileLocation){
 		int BEGIN_INDEX = "http://127.0.0.1/".length();
 		DocumentBuilderFactory df;
 		DocumentBuilder builder;
@@ -62,7 +59,7 @@ public class TestJaxp {
 		    nodeList = document.getElementsByTagName("process:Input");
 		    for (int i = 0; i < nodeList.getLength(); i++){
 		    	element = (Element) nodeList.item(i);
-		    	String param = "?" + element.getAttribute("rdf:ID").substring(1).toLowerCase();
+		    	String param = "?" + element.getAttribute("rdf:ID").toLowerCase();
 		    	parameters.add(param);
 		    	
 		    	String condition = nodeList.item(i).getChildNodes().item(1).getTextContent().substring(BEGIN_INDEX);
@@ -85,9 +82,18 @@ public class TestJaxp {
 		    
 		} catch (Exception e) {
 		    e.printStackTrace();
-		} 
+		}
 		
 		writeToConsole(action, parameters, preConditions, effects);
+	}
+	public static void main(String[] args) throws FileNotFoundException {
+		// TODO Auto-generated method stub
+//		String fileLocation = "E:\\OWL-S WEB SERVICES\\Services\\education-novel_author_service.owls\\book_author_service.owls";
+		//String fileLocation = "E:\\OWL-S WEB SERVICES\\Services\\travel-citycountry_hotel_service.owls\\citycountry_accommodation_service.owls";
+		String fileLocation = "E:\\OWL-S WEB SERVICES\\SWS-TC-1.1\\Services\\BookPriceInStore.owl";
+		
+		translate(fileLocation);
+		
 		
 		
 	}
