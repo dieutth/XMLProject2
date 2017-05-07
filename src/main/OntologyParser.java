@@ -13,9 +13,9 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.util.FileManager;
 
 public class OntologyParser {
-	
-	static final String inputFileName = "E:\\OWL-S WEB SERVICES\\SWS-TC-1.1\\Ontology\\Concepts.owl";
-	
+	public static void main(String[] args) {
+		parseOntology("E:\\OWL-S WEB SERVICES\\SWS-TC-1.1\\Ontology\\Concepts.owl");
+	}
 	public static void writeToConsole(List<String> concepts){
 		System.out.println(":init (and ");
 		for (String c : concepts){
@@ -25,7 +25,8 @@ public class OntologyParser {
 		System.out.println(":goal ");
 		
 	}
-	public static void main(String[] args) {
+	
+	public static void parseOntology(String inputFileName){
 		OntDocumentManager mgr = new OntDocumentManager();
 		OntModelSpec s = new OntModelSpec( OntModelSpec.RDFS_MEM_RDFS_INF );
 		s.setDocumentManager( mgr );
@@ -43,11 +44,12 @@ public class OntologyParser {
 //        }
 		String NS = "http://127.0.0.1/ontology/Concepts.owl#";
 		OntClass paper = m.getOntClass(NS + "Financial_Institution");
-		System.out.println(paper.getSubClass());
-		System.out.println(paper.getSuperClass());
-		Map map = m.getNsPrefixMap();
-		for (Object key : map.keySet())
-			System.out.println(key + "; " + map.get(key));
+		System.out.println("Class " + paper.toString());
+		System.out.println("Its subclass: " + paper.getSubClass());
+		System.out.println("Its superclass: " + paper.getSuperClass().toString());
+//		Map map = m.getNsPrefixMap();
+//		for (Object key : map.keySet())
+//			System.out.println(key + "; " + map.get(key));
 		
 		/*
 		 * Generate problem file
