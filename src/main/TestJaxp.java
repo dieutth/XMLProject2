@@ -29,10 +29,34 @@ public class TestJaxp {
 			System.out.println(e);
 		}
 	}
-	public static void main(String[] args) throws FileNotFoundException {
-		// TODO Auto-generated method stub
-//		String fileLocation = "E:\\OWL-S WEB SERVICES\\Services\\education-novel_author_service.owls\\book_author_service.owls";
-		String fileLocation = "E:\\OWL-S WEB SERVICES\\Services\\travel-citycountry_hotel_service.owls\\citycountry_accommodation_service.owls";
+	
+	public static String createDomainContent(String a, List<String> params,
+											List<String> ps, List<String> es){
+		StringBuilder sb = new StringBuilder();
+		sb.append("(:action " + a + "\n");
+		sb.append("  :parameters (");
+		int len = params.size();
+		for (int i = 0; i < len; i++){
+			if (i != len-1)
+				sb.append(params.get(i) + " ");
+			else{
+				sb.append(params.get(i));
+			}
+		}
+		sb.append(")\n  :precondition (and\n");
+		
+		len = ps.size();
+		for (int i = 0; i < len; i++){
+			sb.append("(" + ps.get(i) + " " + params.get(i) + ")");
+		}
+		sb.append("\n  :effect (and ");
+		for (String e : es){
+			sb.append("(" + e + ")");
+		}
+		sb.append("\n)\n");
+		return sb.toString();
+	}
+	public static String translate(String fileLocation){
 		int BEGIN_INDEX = "http://127.0.0.1/".length();
 		DocumentBuilderFactory df;
 		DocumentBuilder builder;
@@ -62,7 +86,7 @@ public class TestJaxp {
 		    nodeList = document.getElementsByTagName("process:Input");
 		    for (int i = 0; i < nodeList.getLength(); i++){
 		    	element = (Element) nodeList.item(i);
-		    	String param = "?" + element.getAttribute("rdf:ID").substring(1).toLowerCase();
+		    	String param = "?" + element.getAttribute("rdf:ID").toLowerCase();
 		    	parameters.add(param);
 		    	
 		    	String condition = nodeList.item(i).getChildNodes().item(1).getTextContent().substring(BEGIN_INDEX);
@@ -85,11 +109,22 @@ public class TestJaxp {
 		    
 		} catch (Exception e) {
 		    e.printStackTrace();
-		} 
+		}
 		
-		writeToConsole(action, parameters, preConditions, effects);
-		
-		
+//		writeToConsole(action, parameters, preConditions, effects);
+		System.out.println(createDomainContent(action, parameters, preConditions, effects));
+		return createDomainContent(action, parameters, preConditions, effects);
 	}
+//	public static void main(String[] args) throws FileNotFoundException {
+//		// TODO Auto-generated method stub
+////		String fileLocation = "E:\\OWL-S WEB SERVICES\\Services\\education-novel_author_service.owls\\book_author_service.owls";
+//		//String fileLocation = "E:\\OWL-S WEB SERVICES\\Services\\travel-citycountry_hotel_service.owls\\citycountry_accommodation_service.owls";
+//		String fileLocation = "E:\\OWL-S WEB SERVICES\\SWS-TC-1.1\\Services\\BookPriceInStore.owl";
+//		
+//		translate(fileLocation);
+//		
+//		
+//		
+//	}
 
 }
