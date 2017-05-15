@@ -1,7 +1,8 @@
-package main;
+package parser;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -13,8 +14,16 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.util.FileManager;
 
 public class OntologyParser {
-	public static void main(String[] args) {
-		parseOntology("E:\\OWL-S WEB SERVICES\\SWS-TC-1.1\\Ontology\\Concepts.owl");
+	private OntModel m ;
+	
+	public OntologyParser(){
+		OntDocumentManager mgr = new OntDocumentManager();
+		OntModelSpec s = new OntModelSpec( OntModelSpec.RDFS_MEM_RDFS_INF );
+		s.setDocumentManager( mgr );
+		m = ModelFactory.createOntologyModel( s, null );
+	}
+	public OntModel getOntModel(){
+		return m;
 	}
 	public static void writeToConsole(List<String> concepts){
 		System.out.println(":init (and ");
@@ -26,11 +35,8 @@ public class OntologyParser {
 		
 	}
 	
-	public static void parseOntology(String inputFileName){
-		OntDocumentManager mgr = new OntDocumentManager();
-		OntModelSpec s = new OntModelSpec( OntModelSpec.RDFS_MEM_RDFS_INF );
-		s.setDocumentManager( mgr );
-		OntModel m = ModelFactory.createOntologyModel( s, null );
+	public List parseOntology(String inputFileName){
+		
 		// use the FileManager to open the ontology from the filesystem
 		InputStream in = FileManager.get().open(inputFileName);
 		if (in == null) {
@@ -43,14 +49,12 @@ public class OntologyParser {
 //            System.out.println( klass );
 //        }
 		String NS = "http://127.0.0.1/ontology/Concepts.owl#";
-		OntClass paper = m.getOntClass(NS + "Financial_Institution");
-		System.out.println("Class " + paper.toString());
-		System.out.println("Its subclass: " + paper.getSubClass());
-		System.out.println("Its superclass: " + paper.getSuperClass().toString());
-//		Map map = m.getNsPrefixMap();
-//		for (Object key : map.keySet())
-//			System.out.println(key + "; " + map.get(key));
-		
+		OntClass oc = m.getOntClass(NS + "CreditCard");
+		if (oc.hasSuperClass()){
+			for (Iterator<OntClass> i = oc.listSuperClasses(); i.hasNext();){
+				System.out.println(((OntClass)i.next()).toString());
+			}
+		}
 		/*
 		 * Generate problem file
 		 */
@@ -58,13 +62,11 @@ public class OntologyParser {
 		int count = 0;
 		for ( OntClass klass : m.listClasses().toList() ) {
 			concepts.add(klass.toString());
-			count++;
-			if (count > 10)
-				break;
-				
 		}
-		
-		writeToConsole(concepts);
+		concepts.sort(null);
+		return concepts;
 	}
-	
+	public static void main(String[] args) {
+		new OntologyParser().parseOntology("E:\\OWL-S WEB SERVICES\\SWS-TC-1.1\\Ontology\\Concepts.owl");
+	}
 }

@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -26,8 +25,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.apache.jena.ontology.Ontology;
-
 import parser.OntologyParser;
 import parser.WebServiceParser;
 import solver.PDDLSolver;
@@ -35,8 +32,9 @@ import solver.PDDLSolver;
 public class OWL2PDDL extends JFrame implements ActionListener, ListSelectionListener{
 
 	private static final long serialVersionUID = 5173308367703599691L;
-	private static final String conceptFileLocation = "E:\\OWL-S WEB SERVICES\\SWS-TC-1.1\\Ontology\\Concepts.owl";
-	private static final List<String> concepts = OntologyParser.parseOntology(conceptFileLocation);
+	private final String conceptFileLocation = "E:\\OWL-S WEB SERVICES\\SWS-TC-1.1\\Ontology\\Concepts.owl";
+	private List<String> concepts;
+	private OntologyParser op;
 	private JPanel contentPane;
 	private JButton btnBrowser;
 	private JButton btnTranslate;
@@ -52,7 +50,14 @@ public class OWL2PDDL extends JFrame implements ActionListener, ListSelectionLis
 	private JButton btnResetInput;
 	private JScrollPane jspGoal;
 	private JList jlistGoal;
-	
+	private JScrollPane jspSolution;
+	private JTextArea solutionTextArea;
+	private JScrollPane jspProblem;
+	private JTextArea probTextArea;
+	private void loadOntology(){
+		op = new OntologyParser();
+		concepts = op.parseOntology(conceptFileLocation);
+	}
 	/**
 	 * Launch the application.
 	 */
@@ -75,7 +80,7 @@ public class OWL2PDDL extends JFrame implements ActionListener, ListSelectionLis
 	 * Create the frame.
 	 */
 	public OWL2PDDL() {
-		
+		loadOntology();
 		fileList = new ArrayList<String>();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 948, 905);
@@ -178,6 +183,20 @@ public class OWL2PDDL extends JFrame implements ActionListener, ListSelectionLis
 		jlistGoal = new JList(concepts.toArray());
 		jspGoal.setViewportView(jlistGoal);
 		
+		
+		jspSolution = new JScrollPane();
+		jspSolution.setBounds(232, 653, 582, 69);
+		solutionTextArea = new JTextArea();
+		jspSolution.setViewportView(solutionTextArea);
+		contentPane.add(jspSolution);
+		
+		jspProblem = new JScrollPane();
+		jspProblem.setBounds(454, 280, 405, 295);
+		contentPane.add(jspProblem);
+		
+		probTextArea = new JTextArea();
+		jspProblem.setViewportView(probTextArea);
+		
 		registeredAction();
 	}
 
@@ -195,7 +214,15 @@ public class OWL2PDDL extends JFrame implements ActionListener, ListSelectionLis
 			}
 			pddlDomainTextArea.setText(sb.toString());
 		} else if (o == btnGenerateProblemFile){
-			
+			List<String> input = jlistInitialState.getSelectedValuesList();
+			List<String> output = jlistGoal.getSelectedValuesList();
+			StringBuilder sb = new StringBuilder("Input:\n");
+			for (String in : input)
+				sb.append(in + "\n");
+			sb.append("Output:\n");
+			for (String out : output)
+				sb.append(out + "\n");
+			probTextArea.setText(sb.toString());
 		} else if (o == btnSaveToFile){
 			saveFile();
 		} else if (o == btnChooseInput){
@@ -277,11 +304,20 @@ public class OWL2PDDL extends JFrame implements ActionListener, ListSelectionLis
 		List<String> input = jlistInitialState.getSelectedValuesList();
 		List<String> output = jlistGoal.getSelectedValuesList();
 		List<Service> services = new ArrayList<Service>();
+		solutionTextArea.setText("Solving...\nPlease wait!");
 		for (String fileLocation : fileList){
 			Service s = WebServiceParser.parseService(fileLocation);
+//			s.extendService(op.getOntModel());
 			services.add(s);
+//			System.out.println("Input: ");
+//			for (String i : s.getServiceInput())
+//				System.out.println(i);
+//			
+//			System.out.println("Output: ");
+//			for (String i : s.getServiceOutput())
+//				System.out.println(i);
 		}
-		PDDLSolver.solve(input, output, services);
+		solutionTextArea.setText(PDDLSolver.solve(input, output, services, op.getOntModel()));
 	}
 	
 	@Override

@@ -1,6 +1,11 @@
 package main;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+
+import org.apache.jena.ontology.OntClass;
+import org.apache.jena.ontology.OntModel;
 
 public class Service{
 	private List<String> serviceInput;
@@ -43,5 +48,34 @@ public class Service{
 	public void setAction(String action) {
 		this.action = action;
 	}
-
+	
+	public void extendService(OntModel m){
+		List<String> extendedInput = new ArrayList<String>(serviceInput);
+		for (String s : serviceInput){
+			String cla = "";
+			OntClass oc = m.getOntClass(s);
+			if (oc.hasSuperClass()){
+				for (Iterator<OntClass> i = oc.listSuperClasses(); i.hasNext();){
+					cla = ((OntClass)i.next()).toString();
+					if (!extendedInput.contains(cla))
+						extendedInput.add(cla);
+					}
+				}
+		}
+		setServiceInput(extendedInput);
+		
+		List<String> extendedOutput = new ArrayList<String>(serviceOutput);
+		for (String s : serviceOutput){
+			String cla = "";
+			OntClass oc = m.getOntClass(s);
+			if (oc.hasSuperClass()){
+				for (Iterator<OntClass> i = oc.listSuperClasses(); i.hasNext();){
+					cla = ((OntClass)i.next()).toString();
+					if (!extendedInput.contains(cla))
+						extendedInput.add(cla);
+					}
+				}
+		}
+		setServiceOutput(extendedOutput);
+	}
 }
