@@ -2,9 +2,7 @@ package parser;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntDocumentManager;
@@ -25,48 +23,27 @@ public class OntologyParser {
 	public OntModel getOntModel(){
 		return m;
 	}
-	public static void writeToConsole(List<String> concepts){
-		System.out.println(":init (and ");
-		for (String c : concepts){
-			System.out.println("(" + c + " ?" + c.toLowerCase() + ")");
-		}
-		
-		System.out.println(":goal ");
-		
-	}
+	
 	
 	public List parseOntology(String inputFileName){
 		
 		// use the FileManager to open the ontology from the filesystem
 		InputStream in = FileManager.get().open(inputFileName);
 		if (in == null) {
-		throw new IllegalArgumentException( "File: " + inputFileName + " not found"); }
+			throw new IllegalArgumentException( "File: " + inputFileName + " not found"); 
+		}
 		// read the ontology file
 		m.read( in, "" );
 		
-		// write it to standard out (RDF/XML)
-//		for ( OntClass klass : m.listClasses().toList() ) {
-//            System.out.println( klass );
-//        }
-		String NS = "http://127.0.0.1/ontology/Concepts.owl#";
-		OntClass oc = m.getOntClass(NS + "CreditCard");
-		if (oc.hasSuperClass()){
-			for (Iterator<OntClass> i = oc.listSuperClasses(); i.hasNext();){
-				System.out.println(((OntClass)i.next()).toString());
-			}
-		}
-		/*
-		 * Generate problem file
-		 */
 		List<String> concepts = new ArrayList<String>();
-		int count = 0;
+		String s = null;
 		for ( OntClass klass : m.listClasses().toList() ) {
-			concepts.add(klass.toString());
+			s = klass.toString();
+			if (s.contains("#"))
+				concepts.add(s);
 		}
 		concepts.sort(null);
 		return concepts;
 	}
-	public static void main(String[] args) {
-		new OntologyParser().parseOntology("E:\\OWL-S WEB SERVICES\\SWS-TC-1.1\\Ontology\\Concepts.owl");
-	}
+	
 }
