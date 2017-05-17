@@ -1,13 +1,9 @@
 package main;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import org.apache.jena.ontology.OntClass;
-import org.apache.jena.ontology.OntModel;
-
 public class Service{
+	int BEGIN_INDEX = "http://127.0.0.1/".length();
 	private List<String> serviceInput;
 	private List<String> serviceOutput;
 	private List<String> precondition;
@@ -49,33 +45,29 @@ public class Service{
 		this.action = action;
 	}
 	
-	public void extendService(OntModel m){
-		List<String> extendedInput = new ArrayList<String>(serviceInput);
-		for (String s : serviceInput){
-			String cla = "";
-			OntClass oc = m.getOntClass(s);
-			if (oc.hasSuperClass()){
-				for (Iterator<OntClass> i = oc.listSuperClasses(); i.hasNext();){
-					cla = ((OntClass)i.next()).toString();
-					if (!extendedInput.contains(cla))
-						extendedInput.add(cla);
-					}
-				}
+	public String toString(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("(:action " + action + "\n");
+		sb.append("  :parameters (");
+		int len = precondition.size();
+		for (int i = 0; i < len; i++){
+			if (i != len-1)
+				sb.append(precondition.get(i) + " ");
+			else{
+				sb.append(precondition.get(i));
+			}
 		}
-		setServiceInput(extendedInput);
-		
-		List<String> extendedOutput = new ArrayList<String>(serviceOutput);
-		for (String s : serviceOutput){
-			String cla = "";
-			OntClass oc = m.getOntClass(s);
-			if (oc.hasSuperClass()){
-				for (Iterator<OntClass> i = oc.listSuperClasses(); i.hasNext();){
-					cla = ((OntClass)i.next()).toString();
-					if (!extendedInput.contains(cla))
-						extendedInput.add(cla);
-					}
-				}
+		len = serviceInput.size();
+		sb.append(")\n  :precondition (and\n");
+		for (int i = 0; i < len; i++){
+			sb.append("  (" + serviceInput.get(i).substring(BEGIN_INDEX) + " " + precondition.get(i) + ")");
 		}
-		setServiceOutput(extendedOutput);
+		sb.append("  )\n  :effect (and\n");
+		for (String e : serviceOutput){
+			sb.append("  (" + e.substring(BEGIN_INDEX) + ")");
+		}
+		sb.append(" )\n)\n");
+		return sb.toString();
 	}
+
 }
